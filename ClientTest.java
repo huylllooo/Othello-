@@ -11,9 +11,9 @@ public class ClientTest {
 
 
     private static void startClient( String host, int port ) {
-        RemotePlayer c = null;
+        AIPlayer c = null;
         try {
-            c = new RemotePlayer( host, port ); 
+            c = new AIPlayer( host, port ); 
             ReversiBoard b;
             b = Game.game( c );
             b.print();

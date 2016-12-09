@@ -193,4 +193,23 @@ public class ServerPlayer1 implements Player {
         }
         return mv;
     }
+    /**
+    {@inheritDoc}
+
+    	Minimax
+     */    
+    public Move playAI ( ReversiBoard board, int color ) {
+     List<Move> moves = board.legalMoves( color );
+     if ( moves.isEmpty() ) {
+         return new Move();
+     }
+
+     final int i = rgen.nextInt( moves.size() );
+     final Move mv = moves.get(i);
+
+     if ( !isQuiet ) {
+         System.out.println("Random player played " + mv);
+     }
+     return mv;
+ }
 }

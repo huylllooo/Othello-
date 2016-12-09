@@ -26,7 +26,30 @@ import jp.ac.tohoku.ecei.sf.Panel;
  */
 public final class ReversiBoard  extends JPanel implements Sendable {
     private int[][] board;
+    private int[][] point_table = {
+            {99,  -8,  8,  6,  6,  8,  -8, 99},
+            {-8, -24, -4, -3, -3, -4, -24, -8},
+            { 8,  -4,  7,  4,  4,  7,  -4,  8},
+            { 6,  -3,  4,  0,  0,  4,  -3,  6},
+            { 6,  -3,  4,  0,  0,  4,  -3,  6},
+            { 8,  -4,  7,  4,  4,  7,  -4,  8},
+            {-8, -24, -4, -3, -3, -4, -24, -8},
+            {99,  -8,  8,  6,  6,  8,  -8, 99}
+    };
+    private int[][] point_table2 = {
+            {1000,  -300,  100,  80,  80,  100,  -300, 1000},
+            {-300,  -500,  -45, -50, -50,  -45,  -500, -300},
+            { 100,   -45,    3,   1,   1,    3,   -45,  100},
+            {  80,   -50,     1,  5,   5,    1,   -50,   80},
+            {  80,   -50,     1,  5,   5,    1,   -50,   80},
+            { 100,   -45,    3,   1,   1,    3,   -45,  100},
+            {-300,  -500,  -45, -50, -50,  -45,  -500, -300},
+            {1000,  -300,  100,  80,  80,  100,  -300, 1000}
+    };
     private JFrame jf = new JFrame("Othello");
+    public int[][] toArray() {
+    	return this.board;
+    }
 
     /**
        石がないことを表す定数
@@ -42,7 +65,20 @@ public final class ReversiBoard  extends JPanel implements Sendable {
     public static final int WHITE    = 2;
 
     private boolean isPlayerQuited;
-
+    
+    /**
+     * Calculate board's utility
+     * @return
+     */
+    public int utility() {
+		int point = 0;
+		for ( int i = 1; i <= 8; i++ ) {
+	            for ( int j = 1; j <= 8; j++ ) {
+	                point += this.point_table[i-1][j-1]*(this.board[i][j]==2?1:0);
+	            }
+	        }
+	    return point;
+	}
     /**
        石の色を文字列に変換する．
 
@@ -455,15 +491,16 @@ public final class ReversiBoard  extends JPanel implements Sendable {
     /**
      * Draw board on JPanel
      */
-    public void draw() {
+    public Move draw() {
     	jf = new JFrame("Othello");
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.setLayout(new BorderLayout());
+		Panel boardPanel = new Panel(board);
 		
-		jf.add(new Panel(board), BorderLayout.CENTER);
-		
+		jf.add(boardPanel, BorderLayout.CENTER);
 		jf.pack();
 		jf.setVisible(true);
+		return new Move(boardPanel.getRow(), boardPanel.getCol());
     }
     /**
      * Draw board on JPanel

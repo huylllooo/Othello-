@@ -11,10 +11,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 
+import jp.ac.tohoku.ecei.sf.ReversiBoard.IllegalMoveException;
+
 /**
    人間プレイヤーの実装．このプレイヤーは標準入出力を利用して手をユーザに問い合わせる．  
  */
-public class RemotePlayer implements Player {
+public class AIPlayer implements Player {
 
     private final Socket sock; 
     private final InputStream  is; 
@@ -24,11 +26,11 @@ public class RemotePlayer implements Player {
     private final Random  rgen;
     private final boolean isQuiet;
 
-    public RemotePlayer( String host, int port ) throws Exception {
+    public AIPlayer( String host, int port ) throws Exception {
         this ( new Socket( host, port ) );
     }
     
-    public RemotePlayer( Socket sock ) throws Exception {
+    public AIPlayer( Socket sock ) throws Exception {
         this.sock = sock;
         this.is   = sock.getInputStream();
         this.os   = sock.getOutputStream();
@@ -94,67 +96,58 @@ public class RemotePlayer implements Player {
         //Move clicked = board.draw();
         //System.out.print(clicked.toString());
         //return clicked;
+        Value minVl = new Value(10000, new Move());
+        Move minMove = new Move();
         List<Move> moves = board.legalMoves( color );
-        if ( moves.isEmpty() ) {
-            return new Move();
-        }
-        final int i = rgen.nextInt( moves.size() );
-        final Move mv = moves.get(i);
-
-        if ( !isQuiet ) {
-            System.out.println("P1 player played " + mv);
-        }
-        return mv; // */
-       
-        // Read Move from client
-        /*final BufferedReader br = new BufferedReader( new InputStreamReader( System.in ) );
-
-        System.out.println( "Your turn." );
-        
-        String line;
-        try {
-            while ( true ) {
-                System.out.print( (color == ReversiBoard.WHITE ) ? "White?> " : "Black?> " );
-                System.out.flush();
-
-                line = br.readLine();
-                if ( line == null ) {
-                    System.exit(1); 
-                }
-                if ( line.length() < 2 ) {
-                    System.out.println( "Error: input two characters" );                    
-                    System.out.println( "Syntax: [A-H][1-8]" );
-                    continue;
-                } else if (line.length() == 4) { 
-                    byte[] b = line.getBytes();
-                    this.os.write(b); 
-                    String h = "\r\n";
-                    b = h.getBytes();
-                    this.os.write(b); 
-                    this.os.flush();
-                    if (line.charAt(0) == 'Q')
-                        board.setPlayerQuited();
-                    return null;
-                }
-
-                char c0 = line.charAt(0);
-                char c1 = line.charAt(1);
-                Move move = new Move( (c1 - '1') + 1, (c0 - 'A') + 1);
-                if ( board.isLegalMove( move, color ) ) {
-                    return move;
-                }
-                else {
-                    System.out.println( "Invalid move." );
-                    System.out.println( "Syntax: [A-H][1-8] | QUIT | NOOP" );
-                    continue;
-                }
-            }            
-        } catch ( Exception e ) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        return null; // unreachable */
+		for (Move mv : moves) {
+			ReversiBoard tBoard = new ReversiBoard(board.toArray());
+			try {
+				tBoard.move(mv, color);
+				Value temp = maxValue(tBoard, mv, 3);
+				if (temp.getPoint() < minVl.getPoint()) {
+					minVl = temp;
+				}
+			} catch (IllegalMoveException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		System.out.println(minVl.getMove().toString());
+		return minVl.getMove();
     }
+
+	public Value minValue (ReversiBoard board, Move move, int steps) throws IllegalMoveException {
+
+		List<Move> moves = board.legalMoves( ReversiBoard.WHITE );
+		if ( moves.isEmpty() || steps == 0) {
+			return new Value(board.utility(), move);
+		}
+		Value minVl = new Value(10000, move);
+		for (Move mv : moves) {
+			ReversiBoard tBoard = new ReversiBoard(board.toArray());
+			tBoard.move(mv, ReversiBoard.WHITE);
+			Value temp = maxValue(tBoard, move, steps-1);
+			if (temp.getPoint() < minVl.getPoint())
+				minVl = temp;
+		}
+		return minVl;
+	}
+
+	public Value maxValue (ReversiBoard board, Move move, int steps) throws IllegalMoveException {
+		List<Move> moves = board.legalMoves( ReversiBoard.BLACK );
+		if ( moves.isEmpty() || steps == 0) {
+			return new Value(board.utility(), move);
+		}
+		Value maxVl = new Value(-10000, move);
+		for (Move mv : moves) {
+			ReversiBoard tBoard = new ReversiBoard(board.toArray());
+			tBoard.move(mv, ReversiBoard.BLACK);
+			Value temp = minValue(tBoard, move, steps-1);
+			if (temp.getPoint() > maxVl.getPoint())
+				maxVl = temp;
+		}
+		return maxVl;
+	}
 
     public void close() throws IOException {
         sock.close();

@@ -13,8 +13,23 @@ public class Panel extends JPanel{
 	private double boxW;
 	private double boxH;
 	private double cx =0, cy = 0;
+	private int row=0, col=0;
+	private boolean clicked = false;
 	boolean black = true;
 	int[][] chessBoard = new int[10][10];
+	
+	public int getRow() {
+		return this.row;
+	}
+	public int getCol() {
+		return this.col;
+	}
+	public boolean isClicked() {
+		return this.clicked;
+	}
+	protected void setClicked() {
+		this.clicked = true;
+	}
 	public Panel(int[][] board) {
 		super();
 		this.chessBoard = board;
@@ -22,10 +37,6 @@ public class Panel extends JPanel{
 		// add mouse listener
 		this.addMouseListener(new MouseListener() {
 			public void mouseClicked(MouseEvent e) {
-			}
-			public void mouseEntered(MouseEvent e) {
-			}			
-			public void mouseExited(MouseEvent e) {
 			}
 			
 			public void mousePressed(MouseEvent e) {
@@ -37,8 +48,18 @@ public class Panel extends JPanel{
 					cy = (double) mp.y / (double) r.height;
 					repaint();
 				}
+				setClicked();
 			}
-			public void mouseReleased(MouseEvent e) {
+
+			public void mouseEntered(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
 			}
 		});
 	}
@@ -62,13 +83,13 @@ public class Panel extends JPanel{
 			g.drawLine((int) (boxW*0.5), (int) (boxH*(i+0.5)), (int) (boxW*8.5), (int) (boxH*(i+0.5)));
 		}
 		
-		// Draw moves
-		g.setColor(Color.black);
 		// calculate click position
-		int x = (int) (Math.floor((r.width * cx-boxW/2)/boxW));
-		int y = (int) (Math.floor((r.height * cy-boxH/2)/boxH));
+		int x = (int) (Math.floor((r.width * cx-boxW/2)/boxW)) + 1;
+		int y = (int) (Math.floor((r.height * cy-boxH/2)/boxH)) + 1;
+		this.row = x;
+		this.col = y;
 		// save click position
-		if ( x<8 && y<8
+		if ( x<9 && y<9
 		   && x>=0 && y >=0) 
 			if (chessBoard[x][y] == 0)
 				if (black == true) {
@@ -79,12 +100,19 @@ public class Panel extends JPanel{
 					black = true;
 				}
 		// draw all moves */
-		for (int i = 0; i<10; i++) 
-			for (int j = 0; j<10; j++) {
-				if (chessBoard[i][j] == 1)
-					g.fillOval((int)(i * boxW + boxW/2), (int)(j * boxH + boxH/2),(int) (boxW),(int) (boxH));
-				else if (chessBoard[i][j] == 2)
-					g.drawOval((int)(i * boxW + boxW/2), (int)(j * boxH + boxH/2),(int) (boxW),(int) (boxH));
+		for (int i = 1; i<=8; i++) 
+			for (int j = 1; j<=8; j++) {
+				if (chessBoard[i][j] == 1) {
+					g.setColor(Color.black);
+					g.fillOval((int)((i-1) * boxW + boxW*0.55), (int)((j-1) * boxH + boxH*0.55),(int) (boxW*0.9),(int) (boxH*0.9));
+					g.drawOval((int)((i-1) * boxW + boxW*0.55), (int)((j-1) * boxH + boxH*0.55),(int) (boxW*0.9),(int) (boxH*0.9));
+				}
+				else if (chessBoard[i][j] == 2) {
+					g.setColor(Color.white);
+					g.fillOval((int)((i-1) * boxW + boxW*0.55), (int)((j-1) * boxH + boxH*0.55),(int) (boxW*0.9),(int) (boxH*0.9));
+					g.setColor(Color.black);
+					g.drawOval((int)((i-1) * boxW + boxW*0.55), (int)((j-1) * boxH + boxH*0.55),(int) (boxW*0.9),(int) (boxH*0.9));
+				}
 			}
 	}
 }
