@@ -88,22 +88,25 @@ public class AIPlayer implements Player {
     public synchronized Move play ( ReversiBoard board, int color ) throws IOException {
         board.print( color );
         //board.closeCanvas();
-        if ( !board.isPlayable( color ) ) {
-            System.out.println( "Your turn is skipped because you have no move to play." );
-            return new Move();
-        }
         //board.draw();
         //Move clicked = board.draw();
         //System.out.print(clicked.toString());
         //return clicked;
+        int stepsAhead = 5;
+        int count = board.stoneCounts( ReversiBoard.BLACK ) + board.stoneCounts( ReversiBoard.WHITE );
+        if (count>13 && count <47) {
+        		stepsAhead = 3;
+        }
         Value minVl = new Value(10000, new Move());
-        Move minMove = new Move();
         List<Move> moves = board.legalMoves( color );
+        if ( moves.isEmpty() ) {
+            return new Move();
+        }
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			try {
 				tBoard.move(mv, color);
-				Value temp = maxValue(tBoard, mv, 3);
+				Value temp = maxValue(tBoard, mv, stepsAhead, -100000, 100000);
 				if (temp.getPoint() < minVl.getPoint()) {
 					minVl = temp;
 				}
@@ -116,35 +119,46 @@ public class AIPlayer implements Player {
 		return minVl.getMove();
     }
 
-	public Value minValue (ReversiBoard board, Move move, int steps) throws IllegalMoveException {
-
+	public Value minValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
+		if (steps == 0)
+			return new Value(board.utility(), move);
 		List<Move> moves = board.legalMoves( ReversiBoard.WHITE );
-		if ( moves.isEmpty() || steps == 0) {
+		if ( moves.isEmpty()) {
 			return new Value(board.utility(), move);
 		}
-		Value minVl = new Value(10000, move);
+		Value minVl = new Value(100000, move);
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			tBoard.move(mv, ReversiBoard.WHITE);
-			Value temp = maxValue(tBoard, move, steps-1);
-			if (temp.getPoint() < minVl.getPoint())
+			Value temp = maxValue(tBoard, move, steps-1, alpha, beta);
+			if (temp.getPoint() < minVl.getPoint()) {
 				minVl = temp;
+				int mPoint = minVl.getPoint();
+				if (mPoint <= alpha) return minVl;
+				beta = (beta <= mPoint) ? beta : mPoint;
+			}
 		}
 		return minVl;
 	}
 
-	public Value maxValue (ReversiBoard board, Move move, int steps) throws IllegalMoveException {
+	public Value maxValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
+		if (steps == 0)
+			return new Value(board.utility(), move);
 		List<Move> moves = board.legalMoves( ReversiBoard.BLACK );
-		if ( moves.isEmpty() || steps == 0) {
+		if ( moves.isEmpty()) {
 			return new Value(board.utility(), move);
 		}
-		Value maxVl = new Value(-10000, move);
+		Value maxVl = new Value(-100000, move);
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			tBoard.move(mv, ReversiBoard.BLACK);
-			Value temp = minValue(tBoard, move, steps-1);
-			if (temp.getPoint() > maxVl.getPoint())
+			Value temp = minValue(tBoard, move, steps-1, alpha, beta);
+			if (temp.getPoint() > maxVl.getPoint()){
 				maxVl = temp;
+				int mPoint = maxVl.getPoint();
+				if (mPoint >= beta) return maxVl;
+				alpha = (alpha >= mPoint) ? alpha : mPoint;
+			}
 		}
 		return maxVl;
 	}

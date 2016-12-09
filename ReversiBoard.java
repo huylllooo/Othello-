@@ -348,7 +348,7 @@ public final class ReversiBoard  extends JPanel implements Sendable {
     }
 
 
-    private int stoneCounts( int c ) {
+    public int stoneCounts( int c ) {
         int s = 0;
         for ( int i = 1; i <= 8; i++ ) {
             for ( int j = 1; j <= 8; j++ ) {
