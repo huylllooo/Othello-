@@ -85,6 +85,8 @@ public class RemotePlayer implements Player {
 
     public synchronized Move play ( ReversiBoard board, int color ) throws IOException {
         board.print( color );
+        board.closeCanvas();
+        board.draw();
         if ( !board.isPlayable( color ) ) {
             System.out.println( "Your turn is skipped because you have no move to play." );
             return new Move();
@@ -98,12 +100,11 @@ public class RemotePlayer implements Player {
         final Move mv = moves.get(i);
 
         if ( !isQuiet ) {
-            board.print( color );
             System.out.println("P1 player played " + mv);
         }
         return mv; // */
        
-        
+        // Read Move from client
         /*final BufferedReader br = new BufferedReader( new InputStreamReader( System.in ) );
 
         System.out.println( "Your turn." );

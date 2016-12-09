@@ -8,11 +8,25 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import javax.swing.JFrame;
+
+import jp.ac.tohoku.ecei.sf.Panel;
+
 /**
    リバーシの盤面を表すクラス
  */
-public final class ReversiBoard implements Sendable {
+public final class ReversiBoard  extends JPanel implements Sendable {
     private int[][] board;
+    private JFrame jf = new JFrame("Othello");
 
     /**
        石がないことを表す定数
@@ -436,6 +450,26 @@ public final class ReversiBoard implements Sendable {
      */
     public void print( int c ) {
         System.out.print( this.toString(c) );
+    }
+    
+    /**
+     * Draw board on JPanel
+     */
+    public void draw() {
+    	jf = new JFrame("Othello");
+		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jf.setLayout(new BorderLayout());
+		
+		jf.add(new Panel(board), BorderLayout.CENTER);
+		
+		jf.pack();
+		jf.setVisible(true);
+    }
+    /**
+     * Draw board on JPanel
+     */
+    public void closeCanvas() {
+    	jf.dispose();
     }
 
 }

@@ -189,7 +189,6 @@ public class ServerPlayer1 implements Player {
         final Move mv = moves.get(i);
 
         if ( !isQuiet ) {
-            board.print( color );
             System.out.println("Random player played " + mv);
         }
         return mv;
