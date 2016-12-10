@@ -8,6 +8,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.*;
 
+import jp.ac.tohoku.ecei.sf.ReversiBoard.IllegalMoveException;
+
 /**
    ランダムプレイヤーの実装．このプレイヤーは合法手をランダムに指す．
  */
@@ -108,7 +110,7 @@ public class ServerPlayer1 implements Player {
                   String colorStr = s.next();
                   int color = (colorStr=="O") ? 1 : 2;
 
-                  Move m = play(board, color);
+                  Move m = playAI(board, color);
                   m.writeTo(os);
                 }
             }
@@ -199,17 +201,76 @@ public class ServerPlayer1 implements Player {
     	Minimax
      */    
     public Move playAI ( ReversiBoard board, int color ) {
-     List<Move> moves = board.legalMoves( color );
-     if ( moves.isEmpty() ) {
-         return new Move();
-     }
+    	List<Move> moves = board.legalMoves( color );
+        if ( moves.isEmpty() ) {
+            return new Move();
+        }
+        Value maxVl = new Value(-10000, new Move());
+        
+        int stepsAhead = 5;
+        int count = board.stoneCounts( ReversiBoard.BLACK ) + board.stoneCounts( ReversiBoard.WHITE );
+        if (count>15 && count <47) {
+        		stepsAhead = 3;
+        }
+        else if (count > 50) stepsAhead = 6;
+        
+        
+		for (Move mv : moves) {
+			ReversiBoard tBoard = new ReversiBoard(board.toArray());
+			try {
+				tBoard.move(mv, color);
+				Value temp = minValue(tBoard, mv, stepsAhead, -100000, 100000);
+				if (temp.getPoint() > maxVl.getPoint()) {
+					maxVl = temp;
+				}
+			} catch (IllegalMoveException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println(maxVl.getMove().toString());
+		return maxVl.getMove();
+    }
+    public Value minValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
+		if (steps == 0) 
+			return new Value(board.utility(), move);
+		List<Move> moves = board.legalMoves( ReversiBoard.WHITE );
+		if ( moves.isEmpty()) {
+			return new Value(board.utility(), move);
+		}
+		Value minVl = new Value(100000, move);
+		for (Move mv : moves) {
+			ReversiBoard tBoard = new ReversiBoard(board.toArray());
+			tBoard.move(mv, ReversiBoard.WHITE);
+			Value temp = maxValue(tBoard, move, steps-1, alpha, beta);
+			if (temp.getPoint() < minVl.getPoint()) {
+				minVl = temp;
+				int mPoint = minVl.getPoint();
+				if (mPoint <= alpha) return minVl;
+				beta = (beta <= mPoint) ? beta : mPoint;
+			}
+		}
+		return minVl;
+	}
 
-     final int i = rgen.nextInt( moves.size() );
-     final Move mv = moves.get(i);
-
-     if ( !isQuiet ) {
-         System.out.println("Random player played " + mv);
-     }
-     return mv;
- }
+	public Value maxValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
+		if (steps == 0)
+			return new Value(board.utility(), move);
+		List<Move> moves = board.legalMoves( ReversiBoard.BLACK );
+		if ( moves.isEmpty()) {
+			return new Value(board.utility(), move);
+		}
+		Value maxVl = new Value(-100000, move);
+		for (Move mv : moves) {
+			ReversiBoard tBoard = new ReversiBoard(board.toArray());
+			tBoard.move(mv, ReversiBoard.BLACK);
+			Value temp = minValue(tBoard, move, steps-1, alpha, beta);
+			if (temp.getPoint() > maxVl.getPoint()){
+				maxVl = temp;
+				int mPoint = maxVl.getPoint();
+				if (mPoint >= beta) return maxVl;
+				alpha = (alpha >= mPoint) ? alpha : mPoint;
+			}
+		}
+		return maxVl;
+	}
 }

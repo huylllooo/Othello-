@@ -35,9 +35,9 @@ public class ClientTest {
 	}
 
     private static void startClient( String host, int port, ClientTest client ) {
-        AIPlayer c = null;
+        RemotePlayer c = null;
         try {
-            c = new AIPlayer( host, port ); 
+            c = new RemotePlayer( host, port ); 
             ReversiBoard b;
             b = Game.game( c );
             b.print();
@@ -61,7 +61,7 @@ public class ClientTest {
 
     public static void main( String[] args ) {
     	ClientTest test = new ClientTest();
-    	for(int i=0; i<10;i++)
+    	for(int i=0; i<3;i++)
             startClient( "127.0.0.1", 12345, test);
     	test.printCount();
        

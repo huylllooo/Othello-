@@ -79,23 +79,20 @@ public class AIPlayer implements Player {
     }
 
     public synchronized Move play ( ReversiBoard board, int color ) throws IOException {
-        board.print( color );
-        //board.closeCanvas();
-        //board.draw();
-        //Move clicked = board.draw();
-        //System.out.print(clicked.toString());
-        //return clicked;
+    	List<Move> moves = board.legalMoves( color );
+        if ( moves.isEmpty() ) {
+            return new Move();
+        }
+        Value minVl = new Value(10000, new Move());
+        
         int stepsAhead = 5;
         int count = board.stoneCounts( ReversiBoard.BLACK ) + board.stoneCounts( ReversiBoard.WHITE );
         if (count>15 && count <47) {
         		stepsAhead = 3;
         }
         else if (count > 50) stepsAhead = 6;
-        Value minVl = new Value(10000, new Move());
-        List<Move> moves = board.legalMoves( color );
-        if ( moves.isEmpty() ) {
-            return new Move();
-        }
+        
+        
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			try {
@@ -105,7 +102,6 @@ public class AIPlayer implements Player {
 					minVl = temp;
 				}
 			} catch (IllegalMoveException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
