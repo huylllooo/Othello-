@@ -22,9 +22,6 @@ public class AIPlayer implements Player {
     private final InputStream  is; 
     private final OutputStream os; 
 
-    // RandomPlayer Test
-    private final Random  rgen;
-    private final boolean isQuiet;
 
     public AIPlayer( String host, int port ) throws Exception {
         this ( new Socket( host, port ) );
@@ -34,10 +31,6 @@ public class AIPlayer implements Player {
         this.sock = sock;
         this.is   = sock.getInputStream();
         this.os   = sock.getOutputStream();
-        // RandomPlayer Test
-        this.rgen = new Random();
-        this.isQuiet = false;
-
     }
     
     public void sendToServer(ReversiBoard board, int color ) throws IOException {
@@ -79,7 +72,7 @@ public class AIPlayer implements Player {
 
     public String getConnectionStatus()  throws IOException{
         byte[] a = new byte[10];
-        int n = this.is.read(a);
+        this.is.read(a);
         char c0 = (char) a[0];
         char c1 = (char) a[1];
         return String.valueOf(c0)+String.valueOf(c1);
@@ -94,9 +87,10 @@ public class AIPlayer implements Player {
         //return clicked;
         int stepsAhead = 5;
         int count = board.stoneCounts( ReversiBoard.BLACK ) + board.stoneCounts( ReversiBoard.WHITE );
-        if (count>13 && count <47) {
+        if (count>15 && count <47) {
         		stepsAhead = 3;
         }
+        else if (count > 50) stepsAhead = 6;
         Value minVl = new Value(10000, new Move());
         List<Move> moves = board.legalMoves( color );
         if ( moves.isEmpty() ) {
@@ -120,7 +114,7 @@ public class AIPlayer implements Player {
     }
 
 	public Value minValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
-		if (steps == 0)
+		if (steps == 0) 
 			return new Value(board.utility(), move);
 		List<Move> moves = board.legalMoves( ReversiBoard.WHITE );
 		if ( moves.isEmpty()) {

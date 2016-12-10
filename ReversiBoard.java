@@ -35,17 +35,17 @@ public final class ReversiBoard  extends JPanel implements Sendable {
             { 8,  -4,  7,  4,  4,  7,  -4,  8},
             {-8, -24, -4, -3, -3, -4, -24, -8},
             {99,  -8,  8,  6,  6,  8,  -8, 99}
-    };
+    }; // 36-2-22
     private int[][] point_table2 = {
-            {1000,  -300,  100,  80,  80,  100,  -300, 1000},
-            {-300,  -500,  -45, -50, -50,  -45,  -500, -300},
-            { 100,   -45,    3,   1,   1,    3,   -45,  100},
-            {  80,   -50,     1,  5,   5,    1,   -50,   80},
-            {  80,   -50,     1,  5,   5,    1,   -50,   80},
-            { 100,   -45,    3,   1,   1,    3,   -45,  100},
-            {-300,  -500,  -45, -50, -50,  -45,  -500, -300},
-            {1000,  -300,  100,  80,  80,  100,  -300, 1000}
-    };
+            {7, -2,  5,  4,  4,  5, -2, 7},
+            {-2,-1,  1,  1,  1,  1, -1,-2},
+            {5,  1,  6,  5,  5,  6,  1, 5},
+            {4,  1,  5,  6,  6,  5,  1, 4},
+            {4,  1,  5,  6,  6,  5,  1, 4},
+            {5,  1,  6,  5,  5,  6,  1, 5},
+            {-2,-1,  1,  1,  1,  1, -1,-2},
+            {7, -2,  5,  4,  4,  5, -2, 7}
+    }; // 39 3 18
     private JFrame jf = new JFrame("Othello");
     public int[][] toArray() {
     	return this.board;
@@ -74,10 +74,12 @@ public final class ReversiBoard  extends JPanel implements Sendable {
 		int point = 0;
 		for ( int i = 1; i <= 8; i++ ) {
 	            for ( int j = 1; j <= 8; j++ ) {
-	                point += this.point_table[i-1][j-1]*(this.board[i][j]==2?1:0);
+	                point += this.point_table2[i-1][j-1]*(this.board[i][j] == WHITE ? 
+	                										1 : (this.board[i][j] == BLACK) ? -1 : 0);
 	            }
 	        }
-	    return point;
+	      return point;
+	    //return this.stoneCounts(WHITE) - this.stoneCounts(BLACK); // 42 - 2 - 16
 	}
     /**
        石の色を文字列に変換する．
