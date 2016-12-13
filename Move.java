@@ -75,6 +75,7 @@ public class Move implements Sendable {
         this.i = this.j = 4;
         this._isPassed  = true;
     }
+    
 
     /**
        このオブジェクトをバイト列へとシリアライズする．

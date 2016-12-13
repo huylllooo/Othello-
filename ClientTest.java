@@ -61,7 +61,7 @@ public class ClientTest {
 
     public static void main( String[] args ) {
     	ClientTest test = new ClientTest();
-    	for(int i=0; i<3;i++)
+    	for(int i=0; i<1;i++)
             startClient( "127.0.0.1", 12345, test);
     	test.printCount();
        

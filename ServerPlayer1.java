@@ -81,37 +81,44 @@ public class ServerPlayer1 implements Player {
                                OutputStream os ) {
           Scanner s = new Scanner(is).useDelimiter("\\s+");
             try {
-                
                 while ( true ) {
-                  
-                  if(s.next().charAt(0) == 'Q')
-                    break;
-
-                  String bStr = s.next();
-                  System.out.println(bStr);
-                  int[][] bArr = new int[10][10];
-                  // Create new Board from input String
-                  for ( int i = 1; i <= 8; i++ ) {
-                    for ( int j = 1; j <= 8; j++ ) {
-                      int index = (i-1)+(j-1)*8;
-                      if (bStr.charAt(index) == '-')
-                        bArr[j][i] = 0;
-                      else if (bStr.charAt(index) == 'O')
-                        bArr[j][i] = 2;
-                      else if (bStr.charAt(index) == 'X')
-                        bArr[j][i] = 1;
-                    }
+                  char tmp = s.next().charAt(0);
+                  if(tmp == 'Q') {
+                	  System.out.println("Close connection.");
+                	  break;
                   }
-                  ReversiBoard board = new ReversiBoard(bArr);
-                  if (board.isEndGame()) {
-                    os.write( 0x58 );
-                    break;
+                  else if (tmp == 'N') {
+                	  os.write( 0x4F ); // write 'O'
+                  	  os.write( 0x4B ); // write 'K'
+                  	  continue;
                   }
-                  String colorStr = s.next();
-                  int color = (colorStr=="O") ? 1 : 2;
+                  else {
+                	  String bStr = s.next();
+                      System.out.println("MOVE \n" + bStr);
+                      int[][] bArr = new int[10][10];
+                      // Create new Board from input String
+                      for ( int i = 1; i <= 8; i++ ) {
+                        for ( int j = 1; j <= 8; j++ ) {
+                          int index = (i-1)+(j-1)*8;
+                          if (bStr.charAt(index) == '-')
+                            bArr[j][i] = 0;
+                          else if (bStr.charAt(index) == 'O')
+                            bArr[j][i] = 2;
+                          else if (bStr.charAt(index) == 'X')
+                            bArr[j][i] = 1;
+                        }
+                      }
+                      ReversiBoard board = new ReversiBoard(bArr);
+                      if (board.isEndGame()) {
+                        os.write( 0x58 );
+                        break;
+                      }
+                      String colorStr = s.next();
+                      int color = (colorStr=="O") ? 1 : 2;
 
-                  Move m = playAI(board, color);
-                  m.writeTo(os);
+                      Move m = playAI(board, color);
+                      m.writeTo(os);
+                  }
                 }
             }
             catch ( IOException e ) {
@@ -233,6 +240,8 @@ public class ServerPlayer1 implements Player {
     public Value minValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
 		if (steps == 0) 
 			return new Value(board.utility(), move);
+		int a = alpha;
+		int b = beta;
 		List<Move> moves = board.legalMoves( ReversiBoard.WHITE );
 		if ( moves.isEmpty()) {
 			return new Value(board.utility(), move);
@@ -241,12 +250,12 @@ public class ServerPlayer1 implements Player {
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			tBoard.move(mv, ReversiBoard.WHITE);
-			Value temp = maxValue(tBoard, move, steps-1, alpha, beta);
+			Value temp = maxValue(tBoard, move, steps-1, a, b);
 			if (temp.getPoint() < minVl.getPoint()) {
 				minVl = temp;
 				int mPoint = minVl.getPoint();
-				if (mPoint <= alpha) return minVl;
-				beta = (beta <= mPoint) ? beta : mPoint;
+				if (mPoint <= a) return minVl;
+				b = (b <= mPoint) ? b : mPoint;
 			}
 		}
 		return minVl;
@@ -255,6 +264,8 @@ public class ServerPlayer1 implements Player {
 	public Value maxValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
 		if (steps == 0)
 			return new Value(board.utility(), move);
+		int a = alpha;
+		int b = beta;
 		List<Move> moves = board.legalMoves( ReversiBoard.BLACK );
 		if ( moves.isEmpty()) {
 			return new Value(board.utility(), move);
@@ -263,12 +274,12 @@ public class ServerPlayer1 implements Player {
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			tBoard.move(mv, ReversiBoard.BLACK);
-			Value temp = minValue(tBoard, move, steps-1, alpha, beta);
+			Value temp = minValue(tBoard, move, steps-1, a, b);
 			if (temp.getPoint() > maxVl.getPoint()){
 				maxVl = temp;
 				int mPoint = maxVl.getPoint();
-				if (mPoint >= beta) return maxVl;
-				alpha = (alpha >= mPoint) ? alpha : mPoint;
+				if (mPoint >= b) return maxVl;
+				a = (a >= mPoint) ? a : mPoint;
 			}
 		}
 		return maxVl;

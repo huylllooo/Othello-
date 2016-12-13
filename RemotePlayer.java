@@ -35,7 +35,6 @@ public class RemotePlayer implements Player {
         // RandomPlayer Test
         this.rgen = new Random();
         this.isQuiet = false;
-
     }
     
     public void sendToServer(ReversiBoard board, int color ) throws IOException {
@@ -66,11 +65,13 @@ public class RemotePlayer implements Player {
         if (c0 == 'X')
             return new Move();
         
+        // check error reading InputStream
         char c1 = (char) a[1];
         if (c1 == 0) {
             this.is.read(a);
             c1 = (char) a[0];
         }
+        
         Move move = new Move( (c1 - '1') + 1, (c0 - 'A') + 1);
         return move;
     }
@@ -79,7 +80,8 @@ public class RemotePlayer implements Player {
         byte[] a = new byte[10];
         int n = this.is.read(a);
         char c0 = (char) a[0];
-        char c1 = (char) a[1];
+        this.is.read(a);
+        char c1 = (char) a[0];
         return String.valueOf(c0)+String.valueOf(c1);
     }
 
@@ -94,7 +96,7 @@ public class RemotePlayer implements Player {
         //Move clicked = board.draw();
         //System.out.print(clicked.toString());
         //return clicked;
-        List<Move> moves = board.legalMoves( color );
+        /*List<Move> moves = board.legalMoves( color );
         if ( moves.isEmpty() ) {
             return new Move();
         }
@@ -107,7 +109,7 @@ public class RemotePlayer implements Player {
         return mv; // */
        
         // Read Move from client
-        /*final BufferedReader br = new BufferedReader( new InputStreamReader( System.in ) );
+        final BufferedReader br = new BufferedReader( new InputStreamReader( System.in ) );
 
         System.out.println( "Your turn." );
         

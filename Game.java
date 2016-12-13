@@ -34,11 +34,12 @@ public class Game {
                     else {
                         if (!m._isPassed)
                             board.move(m, c);
+                        
                         c = board.flipColor(c);
-
                         q1.sendToServer(board, c);
-
+                        
                         Move m2 = q1.receiveFromServer();
+                        System.out.println("Opponent's move: " + m2.toString());
                         if (!m2._isPassed)
                             board.move(m2, c);
 
