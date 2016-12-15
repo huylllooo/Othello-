@@ -99,7 +99,7 @@ public class ServerPlayer1 implements Player {
                       // Create new Board from input String
                       for ( int i = 1; i <= 8; i++ ) {
                         for ( int j = 1; j <= 8; j++ ) {
-                          int index = (i-1)+(j-1)*8;
+                          int index = (j-1)+(i-1)*8;
                           if (bStr.charAt(index) == '-')
                             bArr[j][i] = 0;
                           else if (bStr.charAt(index) == 'O')
@@ -118,6 +118,9 @@ public class ServerPlayer1 implements Player {
 
                       Move m = playAI(board, color);
                       m.writeTo(os);
+                      String h = "\r\n";
+                      byte[] b = h.getBytes();
+                      os.write(b);
                   }
                 }
             }
@@ -150,6 +153,7 @@ public class ServerPlayer1 implements Player {
         try {
             while ( true ) {
                 final Socket conn = sock.accept();
+                System.out.println("Get connection: " + sock.getLocalSocketAddress());
                 try {
                     pool.execute( new Worker( conn ) );
                 }
@@ -217,16 +221,20 @@ public class ServerPlayer1 implements Player {
         int stepsAhead = 5;
         int count = board.stoneCounts( ReversiBoard.BLACK ) + board.stoneCounts( ReversiBoard.WHITE );
         if (count>15 && count <47) {
-        		stepsAhead = 3;
+        		stepsAhead = 4;
         }
-        else if (count > 50) stepsAhead = 6;
-        
+        else if (count > 50) {
+        	if (count > 55)
+        		stepsAhead = 9;
+        	else
+        		stepsAhead = 6;	
+        }
         
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			try {
 				tBoard.move(mv, color);
-				Value temp = minValue(tBoard, mv, stepsAhead, -100000, 100000);
+				Value temp = minValue(tBoard, mv, stepsAhead, -100000, 100000, count);
 				if (temp.getPoint() > maxVl.getPoint()) {
 					maxVl = temp;
 				}
@@ -237,20 +245,32 @@ public class ServerPlayer1 implements Player {
 		System.out.println(maxVl.getMove().toString());
 		return maxVl.getMove();
     }
-    public Value minValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
+    public Value minValue (ReversiBoard board, Move move, int steps, int alpha, int beta, int stoneCount) throws IllegalMoveException {
 		if (steps == 0) 
-			return new Value(board.utility(), move);
+			if (stoneCount > 50)
+				return new Value(board.utility(), move);
+			else
+				return new Value(board.utility(), move);
 		int a = alpha;
 		int b = beta;
 		List<Move> moves = board.legalMoves( ReversiBoard.WHITE );
 		if ( moves.isEmpty()) {
-			return new Value(board.utility(), move);
+			if (board.isEndGame())
+				if (stoneCount > 50)
+					return new Value(board.utility(), move);
+				else
+					return new Value(board.utility(), move);
+			else {
+				ReversiBoard tBoard = new ReversiBoard(board.toArray());
+				Value temp = maxValue(tBoard, move, steps-1, a, b, stoneCount);
+				return temp;
+			}
 		}
 		Value minVl = new Value(100000, move);
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			tBoard.move(mv, ReversiBoard.WHITE);
-			Value temp = maxValue(tBoard, move, steps-1, a, b);
+			Value temp = maxValue(tBoard, move, steps-1, a, b, stoneCount);
 			if (temp.getPoint() < minVl.getPoint()) {
 				minVl = temp;
 				int mPoint = minVl.getPoint();
@@ -261,20 +281,32 @@ public class ServerPlayer1 implements Player {
 		return minVl;
 	}
 
-	public Value maxValue (ReversiBoard board, Move move, int steps, int alpha, int beta) throws IllegalMoveException {
+	public Value maxValue (ReversiBoard board, Move move, int steps, int alpha, int beta, int stoneCount) throws IllegalMoveException {
 		if (steps == 0)
-			return new Value(board.utility(), move);
+			if (stoneCount > 50)
+				return new Value(board.utility(), move);
+			else
+				return new Value(board.utility(), move);
 		int a = alpha;
 		int b = beta;
 		List<Move> moves = board.legalMoves( ReversiBoard.BLACK );
 		if ( moves.isEmpty()) {
-			return new Value(board.utility(), move);
+			if (board.isEndGame())
+				if (stoneCount > 50)
+					return new Value(board.utility(), move);
+				else
+					return new Value(board.utility(), move);
+			else {
+				ReversiBoard tBoard = new ReversiBoard(board.toArray());
+				Value temp = minValue(tBoard, move, steps-1, a, b, stoneCount);
+				return temp;
+			}
 		}
 		Value maxVl = new Value(-100000, move);
 		for (Move mv : moves) {
 			ReversiBoard tBoard = new ReversiBoard(board.toArray());
 			tBoard.move(mv, ReversiBoard.BLACK);
-			Value temp = minValue(tBoard, move, steps-1, a, b);
+			Value temp = minValue(tBoard, move, steps-1, a, b, stoneCount);
 			if (temp.getPoint() > maxVl.getPoint()){
 				maxVl = temp;
 				int mPoint = maxVl.getPoint();

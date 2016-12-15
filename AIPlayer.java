@@ -1,15 +1,11 @@
 package jp.ac.tohoku.ecei.sf;
 
-import java.io.*;
 import java.net.*;
-import java.nio.charset.Charset;
 import java.io.OutputStream; 
 import java.io.InputStream;
-import java.io.Closeable; 
 import java.io.IOException;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 import jp.ac.tohoku.ecei.sf.ReversiBoard.IllegalMoveException;
 

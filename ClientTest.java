@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.Closeable; 
 import java.io.IOException;
 
+import javax.swing.JFrame;
+
 public class ClientTest {
 	private int countWin ;
 	private int countDraw;
@@ -58,16 +60,25 @@ public class ClientTest {
         }
         catch ( Exception e ) {}
     }
+    
+    private static void startClient2 (String host, int port) {
+    	HumanPlayer h;
+		try {
+			h = new HumanPlayer(host, port);
+	    	h.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }//*/
 
     public static void main( String[] args ) {
     	ClientTest test = new ClientTest();
-    	for(int i=0; i<1;i++)
+    	/*for(int i=0; i<1;i++)
             startClient( "127.0.0.1", 12345, test);
     	test.printCount();
-       
-        
         System.out.println("-----------------------------------");
-        System.out.println("Game finished.");
+        System.out.println("Game finished.");//*/
+    	startClient2( "127.0.0.1", 12345); //*/
     }
 
 }

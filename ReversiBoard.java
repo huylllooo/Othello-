@@ -9,10 +9,12 @@ import java.io.InputStream;
 import java.io.IOException;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.JPanel;
@@ -25,27 +27,22 @@ import jp.ac.tohoku.ecei.sf.Panel;
    リバーシの盤面を表すクラス
  */
 public final class ReversiBoard  extends JPanel implements Sendable {
+	private boolean isDrawn = false;
+	public boolean isDrawn() {
+		return this.isDrawn;
+	}
+	private Panel boardPanel;
     private int[][] board;
     private int[][] point_table = {
-            {99,  -8,  8,  6,  6,  8,  -8, 99},
+            {299,  -8,  8,  6,  6,  8,  -8, 299},
             {-8, -24, -4, -3, -3, -4, -24, -8},
             { 8,  -4,  7,  4,  4,  7,  -4,  8},
             { 6,  -3,  4,  0,  0,  4,  -3,  6},
             { 6,  -3,  4,  0,  0,  4,  -3,  6},
             { 8,  -4,  7,  4,  4,  7,  -4,  8},
             {-8, -24, -4, -3, -3, -4, -24, -8},
-            {99,  -8,  8,  6,  6,  8,  -8, 99}
-    }; // 36-2-22
-    private int[][] point_table2 = {
-            {7, -2,  5,  4,  4,  5, -2, 7},
-            {-2,-1,  1,  1,  1,  1, -1,-2},
-            {5,  1,  6,  5,  5,  6,  1, 5},
-            {4,  1,  5,  6,  6,  5,  1, 4},
-            {4,  1,  5,  6,  6,  5,  1, 4},
-            {5,  1,  6,  5,  5,  6,  1, 5},
-            {-2,-1,  1,  1,  1,  1, -1,-2},
-            {7, -2,  5,  4,  4,  5, -2, 7}
-    }; // 39 3 18
+            {299,  -8,  8,  6,  6,  8,  -8, 299}
+    }; 
     private JFrame jf = new JFrame("Othello");
     public int[][] toArray() {
     	return this.board;
@@ -74,12 +71,18 @@ public final class ReversiBoard  extends JPanel implements Sendable {
 		int point = 0;
 		for ( int i = 1; i <= 8; i++ ) {
 	            for ( int j = 1; j <= 8; j++ ) {
-	                point += this.point_table2[i-1][j-1]*(this.board[i][j] == WHITE ? 
+	                point += this.point_table[i-1][j-1]*(this.board[i][j] == WHITE ? 
 	                										1 : (this.board[i][j] == BLACK) ? -1 : 0);
 	            }
 	        }
 	      return point;
-	    //return this.stoneCounts(WHITE) - this.stoneCounts(BLACK); // 42 - 2 - 16
+	}
+    /**
+     * Calculate board's utility for later moves
+     * @return
+     */
+    public int utility2() {
+	    return this.stoneCounts(WHITE) - this.stoneCounts(BLACK); 
 	}
     /**
        石の色を文字列に変換する．
@@ -493,16 +496,26 @@ public final class ReversiBoard  extends JPanel implements Sendable {
     /**
      * Draw board on JPanel
      */
-    public Move draw() {
+    public void draw() {
     	jf = new JFrame("Othello");
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.setLayout(new BorderLayout());
-		Panel boardPanel = new Panel(board);
-		
-		jf.add(boardPanel, BorderLayout.CENTER);
+		this.boardPanel = new Panel(this.board);
+		jf.add(this.boardPanel, BorderLayout.CENTER);
 		jf.pack();
 		jf.setVisible(true);
-		return new Move(boardPanel.getRow(), boardPanel.getCol());
+		this.isDrawn = true;
+		
+    }
+    /**
+     * Update drawn board
+     */
+    public void updateCanvas() {
+    	jf.getContentPane().removeAll();
+    	this.boardPanel = new Panel(this.board);
+    	jf.getContentPane().add(boardPanel);
+		//jf.pack();
+		jf.setVisible(true);
     }
     /**
      * Draw board on JPanel
@@ -510,5 +523,8 @@ public final class ReversiBoard  extends JPanel implements Sendable {
     public void closeCanvas() {
     	jf.dispose();
     }
-
+    
+    public boolean isClicked() {
+    	return this.boardPanel.isClicked();
+    }
 }
