@@ -182,7 +182,7 @@ public class ServerPlayer1 implements Player {
         }
         Value maxVl = new Value(-10000, new Move());
         
-        int stepsAhead = 5;
+        int stepsAhead = 4;
         int count = board.stoneCounts( ReversiBoard.BLACK ) + board.stoneCounts( ReversiBoard.WHITE );
         if (count>15 && count <47) {
         		stepsAhead = 4;
