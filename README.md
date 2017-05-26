@@ -9,7 +9,7 @@ Further description can be view ['here'](https://docs.google.com/document/d/1kUh
 
 Prompt your terminal to 'Othello_Unix' folder.
 
-#### Build file
+#### 1.Build file
 
 Use command
 
@@ -17,7 +17,7 @@ Use command
 
 to compile and make executable file c7.jar
 
-#### Execute
+#### 2.Execute
 
 Server
 
