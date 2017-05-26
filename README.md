@@ -20,12 +20,19 @@ to compile and make executable file c7.jar
 #### Execute
 
 Server
-    java -jar c7.jar server [PORT]
+
+	java -jar c7.jar server [PORT]
+
 RemoteClient
+
     java -jar c7.jar client [HOST] [PORT]
+
 RandomClient
+
     java -jar c7.jar rclient [HOST] [PORT]
+
 HumanClient
+
     java -jar c7.jar hclient [HOST] [PORT]
 
 ### Windows (Eclipse IDE)
@@ -35,4 +42,4 @@ Create a new package named 'jp.ac.tohoku.ecei.sf' and import all the files.
 Run 'ServerTest.java' first to set up the server.
 Run 'ClientTest.java' to create a client, connect to server and start a new game.
 
-*Note* PORT number is hard-coded in 'ServerTest.java' file.
+*Note:* PORT_number is hard-coded in 'ServerTest.java' file.
