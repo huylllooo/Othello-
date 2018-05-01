@@ -3,7 +3,7 @@ Othello Game
 Server/Client programs allows multiple users to play with server’s AI.
 Further description can be view ['here'](https://docs.google.com/document/d/1kUhQb_2QC6ZydOxRn0TH-FTgd-9x0WgA_Im5RN-hA0w/edit?usp=sharing)
 
-![alt text](png/ss.png)
+![alt text](img/ss.png)
 
 ## Run the code
 
